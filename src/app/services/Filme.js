@@ -27,6 +27,7 @@ module.exports = {
 
                     $('ul li.mdl .entity-card-list').each((i, element) => {
                         const casts = [];
+                        const directions = [];
                         const cheerioElement = $(element);
 
                         let title = cheerioElement.find('.meta-title-link').text();
@@ -35,6 +36,8 @@ module.exports = {
                         let image = imageData || imageSrc;
                         let date = cheerioElement.find('.date').text();
                         let trailer = cheerioElement.find('.buttons-holder .button-primary-full').attr('href');
+                        let sinopse = cheerioElement.find('.content-txt').text();
+                        sinopse = sinopse.replace(/\\n/, '').trim();
 
                         try {
                             cheerioElement.find('.meta-body-actor').html().match(/(<span)(.*)(<\/span.)/gm).map((el) => {
@@ -44,13 +47,31 @@ module.exports = {
                             casts.splice(0, 1);
                         } catch (err) {}
 
+                        try {
+                            let directionsHTML = cheerioElement.find('.meta-body-direction').html();
+
+                            directionsHTML.match(/(<span)(.*)(<\/span.)/gm).map(el => {
+                                let direction = $(el).text();
+                                directions.push(direction);
+                            }); 
+                            directions.splice(0, 1);
+
+                            directionsHTML.match(/(<a)(.*)(<\/a.)/gm).map(el => {
+                                let direction = $(el).text();
+                                directions.push(direction);
+                            }); 
+
+                        } catch (err) {}
+
                         let filme = {};
 
                         filme.titulo = title;
                         filme.image = image;
                         filme.date = date;
                         filme.trailer = trailer;
+                        filme.direcao = directions;
                         filme.elenco = casts;
+                        filme.sinopse = sinopse;
 
                         filmes.push(filme);
 
