@@ -1,23 +1,23 @@
 const cheerio = require('cheerio');
 const request = require('request');
-const { promisify } = require('util');
+import Filme from './../models/Filme';
 
 
 
+class FilmeService {
 
-module.exports = {
+    private filmes: Array<Filme> = [];
+    private filme: Filme;
 
-    async getFilmes(page) {
+        getFilmes(page: number) {
 
         return new Promise((resolve, reject) => {
-            let filmes = []
-
             request(
                 {
                     method: 'GET',
                     url: `http://www.adorocinema.com/filmes/numero-cinemas/?page=${page}`
                 },
-                (err, res, body) => {
+                (err: any, res: any, body: any) => {
                     if (err) {
                         reject(err);
                         return err;
@@ -25,9 +25,9 @@ module.exports = {
 
                     let $ = cheerio.load(body);
 
-                    $('ul li.mdl .entity-card-list').each((i, element) => {
-                        const casts = [];
-                        const directions = [];
+                    $('ul li.mdl .entity-card-list').each((i: any, element: any) => {
+                        let casts: Array<string> = [];
+                        let directions: Array<string> = [];
                         const cheerioElement = $(element);
 
                         let title = cheerioElement.find('.meta-title-link').text();
@@ -40,7 +40,7 @@ module.exports = {
                         sinopse = sinopse.replace(/\\n/, '').trim();
 
                         try {
-                            cheerioElement.find('.meta-body-actor').html().match(/(<span)(.*)(<\/span.)/gm).map((el) => {
+                            cheerioElement.find('.meta-body-actor').html().match(/(<span)(.*)(<\/span.)/gm).map((el: any) => {
                                 let actor = $(el).text();
                                 casts.push(actor);
                             });
@@ -50,34 +50,37 @@ module.exports = {
                         try {
                             let directionsHTML = cheerioElement.find('.meta-body-direction').html();
 
-                            directionsHTML.match(/(<span)(.*)(<\/span.)/gm).map(el => {
+                            directionsHTML.match(/(<span)(.*)(<\/span.)/gm).map((el: any) => {
                                 let direction = $(el).text();
                                 directions.push(direction);
                             }); 
                             directions.splice(0, 1);
 
-                            directionsHTML.match(/(<a)(.*)(<\/a.)/gm).map(el => {
+                            directionsHTML.match(/(<a)(.*)(<\/a.)/gm).map((el: any) => {
                                 let direction = $(el).text();
                                 directions.push(direction);
                             }); 
 
                         } catch (err) {}
 
-                        let filme = {};
+                        this.filme = new Filme();
 
-                        filme.titulo = title;
-                        filme.image = image;
-                        filme.date = date;
-                        filme.trailer = trailer;
-                        filme.direcao = directions;
-                        filme.elenco = casts;
-                        filme.sinopse = sinopse;
 
-                        filmes.push(filme);
+                        this.filme.setTitulo(title);
+                        
+                        this.filme.setImage(image);
+                        this.filme.setDate(date);
+                        this.filme.setTrailer(trailer);
+                        this.filme.setDirecao(directions);
+                        this.filme.setElenco(casts);
+                        this.filme.setSinopse(sinopse);
+
+                        this.filmes.push(this.filme);
+
 
                     });
 
-                    resolve(filmes);
+                    resolve(this.filmes);
 
                     
                 }
@@ -87,4 +90,8 @@ module.exports = {
 
         
     }
+
 }
+
+module.exports = new FilmeService();
+

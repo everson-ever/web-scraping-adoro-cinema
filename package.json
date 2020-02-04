@@ -15,6 +15,7 @@
     "request": "^2.88.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.2",
     "nodemon": "^2.0.2"
   }
 }

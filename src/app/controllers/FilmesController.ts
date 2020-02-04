@@ -3,7 +3,7 @@ const filmesService = require('./../services/Filme');
 
 class FilmesController {
 
-    async index(req, res) {
+    async index(req: any, res: any) {
         let page = req.query.page || 1;
 
         let filmes = await filmesService.getFilmes(page);
